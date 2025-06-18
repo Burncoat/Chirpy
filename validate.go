@@ -23,41 +23,16 @@ func handlerValidate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(params.Body) > 140 {
-		type badBody struct {
-			Error string `json:"error"`
-		}
-		respBody := badBody{
-			Error: "Chirp is too long",
-		}
-		dat, err := json.Marshal(respBody)
-		if err != nil {
-			log.Printf("Error marshalling JSON: %s", err)
-			w.WriteHeader(500)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(400)
-		w.Write(dat)
+		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
-
 	type cleanedBody struct {
 		CleanedBody string `json:"cleaned_body"`
 	}
 
-	respBody := cleanedBody{
+	respondWithJSON(w, http.StatusOK, cleanedBody{
 		CleanedBody: profanityFilter(params.Body),
-	}
-
-	dat, err := json.Marshal(respBody)
-		if err != nil {
-			log.Printf("Error marshalling JSON: %s", err)
-			w.WriteHeader(500)
-			return
-		}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(dat)
+	})
 }
 
 func profanityFilter(body string) string {

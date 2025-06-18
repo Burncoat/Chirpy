@@ -1,2 +1,4 @@
 out
 **.http
+psql_link
+.env
