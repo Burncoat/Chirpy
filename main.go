@@ -16,8 +16,9 @@ import (
 
 type apiConfig struct {
 		fileserverHits atomic.Int32
-		db 	*database.Queries
-		platform string
+		db 			   *database.Queries
+		platform 	   string
+		jwtSecret      string
 	}
 
 func main() {
@@ -31,6 +32,10 @@ func main() {
 	if platform == "" {
 		log.Fatal("PLATFORM must be set")
 	}
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET must be set")
+	}
 	dbQueries := database.New(db)
 
 	const filePathRoot = "."
@@ -41,8 +46,9 @@ func main() {
 	mux := http.NewServeMux()
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
-		db: dbQueries,
-		platform: platform,
+		db: 			dbQueries,
+		platform:	    platform,
+		jwtSecret:      jwtSecret,
 	}
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(filePathRoot)))
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(handler))
